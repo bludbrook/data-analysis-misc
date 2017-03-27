@@ -3,6 +3,8 @@
 Created on Mon May 30 16:52:07 2016
 
 @author: ludbroba
+
+A collection of functions to load, process, analyze and plot Hall effect measurements.
 """
 import pandas as pd 
 import os
@@ -18,6 +20,12 @@ plt.style.use('ggplot')
 Define some functions to import data
 """
 def load_file_press(file_str,Vg,t):
+    """ Load data measured using a press-puck
+        arguments:  file_str    the file name
+                    Vg          applied gate voltage
+                    t           sample thickness (nm) 
+    """
+    
     file_name = file_str
     thick = t
     gate = Vg
@@ -37,6 +45,12 @@ def load_file_press(file_str,Vg,t):
     return df1
 
 def load_file_press_T2(file_str,Vg,t):
+""" Load data measured using a press-puck with T2 activated
+        arguments:  file_str    the file name
+                    Vg          applied gate voltage
+                    t           sample thickness (nm) 
+    """
+    
     file_name = file_str
     thick = t
     gate = Vg
@@ -53,6 +67,12 @@ def load_file_press_T2(file_str,Vg,t):
     return df1
 
 def load_file(file_str,Vg,t):
+    """ Load data measured using a Hall-bar
+        arguments:  file_str    the file name
+                    Vg          applied gate voltage
+                    t           sample thickness (nm) 
+    """
+    
     file_name = file_str
     thick = t
     gate = Vg
@@ -72,6 +92,12 @@ def load_file(file_str,Vg,t):
     return df1
 
 def load_file_T2(file_str,Vg,t):
+    """ Load data measured using a Hall-bar with T2 activated
+        arguments:  file_str    the file name
+                    Vg          applied gate voltage
+                    t           sample thickness (nm) 
+    """
+    
     file_name = file_str
     thick = t
     gate = Vg
@@ -87,33 +113,16 @@ def load_file_T2(file_str,Vg,t):
     df1['AHE'] = df1['AHE']*(-1) + shift
     return df1
     
-def load_file_Tdep(file_str,Vg,t):
-    file_name = file_str
-    thick = t
-    gate = Vg
 
-    data =  np.genfromtxt(file_name,delimiter=',',usecols=(3,4,5,20,21,34),skip_header=32,names=None)
-    c_names = ['Temp1','Field','Pos','Resistance','AHE','Temp2']
-    df1 = pd.DataFrame(data[:].copy(), columns=c_names)
-    df1['Thick'] = thick
-    df1['Gate'] = gate
-    print("Loading file of T-dependent data with Vg=",Vg,"and thickness=",t)
-    return df1
-    
-def load_file_press_Tdep(file_str,Vg,t):
-    file_name = file_str
-    thick = t
-    gate = Vg
+"""
+Some functions to process the data
+"""
 
-    data =  np.genfromtxt(file_name,delimiter=',',usecols=(3,4,5,20,21,34),skip_header=32,names=None)
-    c_names = ['Temp1','Field','Pos','AHE', 'Resistance','Temp2']
-    df1 = pd.DataFrame(data[:].copy(), columns=c_names)
-    df1['Thick'] = thick
-    df1['Gate'] = gate
-    print("Loading file of T-dependent data with Vg=",Vg,"and thickness=",t)
-    return df1
-    
 def procT_df(df_name):
+    """
+    Split data measured at different temperatures into separate dataframes
+    Correct for arbitrary data offset
+    """
     df1 = df_name
     df1['Temp2_diff']=df1['Temp2'].diff()
     df_filt = df1[df1['Temp2_diff'].abs() > 4]
@@ -133,8 +142,7 @@ def procT_df(df_name):
 
     for i in range(len(df_filt)+1):
         df = dataframes[i].copy()
-       
-
+        
         df['Pos_diff']=df['Pos'].diff()
         df_filt1 = df[df['Pos_diff'] > 10]
         flip = df_filt1.index.tolist()[0]-1
@@ -149,6 +157,10 @@ def procT_df(df_name):
     return corr_data
 
 def procT_NF_df(df_name):
+     """
+    Split data measured at different temperatures into separate dataframes
+    Correct for arbitrary data offset
+    """
     df1 = df_name
     df1['Temp2_diff']=df1['Temp2'].diff()
     df_filt = df1[df1['Temp2_diff'].abs() > 2]
@@ -179,6 +191,10 @@ def procT_NF_df(df_name):
     return corr_data
     
 def split_T(df_im):
+     """
+    Split data measured at different temperatures into separate dataframes
+    Correct for arbitrary data offset
+    """
     df = df_im.copy()
     df['Temp2_diff']=df['Temp2'].diff()
     df_filt = df[df['Temp2_diff'].abs() > 2]
@@ -210,6 +226,10 @@ def split_T(df_im):
     return corr_data
     
 def analyse_T(dict_sample):
+     """
+    Perform analysis on Hall data to extract key parameters
+    Takes a dict of temperature-split data
+    """
     corr_data = dict_sample
     Thickness = []
     Resistivity = []
