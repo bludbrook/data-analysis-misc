@@ -1,1 +1,3 @@
-# data-analysis-misc
+# Miscellaneous data analysis scripts
+
+data-analysis-misc
